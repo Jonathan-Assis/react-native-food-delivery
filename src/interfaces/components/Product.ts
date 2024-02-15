@@ -5,6 +5,7 @@ export interface IProductData {
     title: string
     description: string
     thumbnail: ImageProps
+    quantity?: number
 }
 export interface IProduct extends TouchableOpacityProps {
     data: IProductData
