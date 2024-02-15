@@ -4,7 +4,7 @@ import { IButton, IButtonText, IButtonIcon } from "@/interfaces/components/Butto
 const Button = ({ children, ...rest }: IButton) => {
     return (
         <TouchableOpacity
-            className="h-12 w-full ml-2 bg-lime-400 rounded-md items-center justify-center flex-row"
+            className="h-12 bg-lime-400 rounded-md items-center justify-center flex-row"
             activeOpacity={0.7}
             {...rest}
         >
