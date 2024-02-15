@@ -1,3 +1,4 @@
+export { Button } from "./Button"
 export { CategoryButton } from "./CategoryButton"
 export { Header } from "./Header"
 export { Loading } from "./Loading"
