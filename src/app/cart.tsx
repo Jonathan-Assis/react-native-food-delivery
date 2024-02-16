@@ -1,15 +1,56 @@
-import { ScrollView, Text, View } from "react-native"
+import { useState } from "react"
+import { Alert, ScrollView, Text, View, Linking } from "react-native"
+import { useNavigation } from "expo-router"
+import { Feather } from "@expo/vector-icons"
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 
 import { Button, Header, Input, LinkButton, Product } from "@/components"
 import { useCartStore } from "@/stores/cart-store"
 import { formatCurrency } from "@/utils/functions/format-currency"
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
-import { Feather } from "@expo/vector-icons"
+import { IProductCartProps } from "@/interfaces/stores/cart-store"
 
 export default function Cart() {
     const cartStore = useCartStore()
+    const navigation = useNavigation()
+    const [address, setAddress] = useState("")
+
     const values = cartStore.products.reduce((total, product) => total + product.price * product.quantity, 0)
     const total = formatCurrency(values)
+
+    function handleProductRemove(product: IProductCartProps) {
+        Alert.alert("Remover", `Deseja remover ${product.title} do carrinho?`, [
+            {
+                text: "Cancelar",
+            },
+
+            {
+                text: "Remover",
+                onPress: () => cartStore.remove(product.id),
+            },
+        ])
+    }
+    function handleOrder() {
+        if (address.trim().length === 0) {
+            return Alert.alert("Pedido", "Informe os dados da entrega.")
+        }
+        const products = cartStore.products.map((product) => `\n ${product.quantity} ${product.title}`).join("")
+        const message = `🍔 NOVO PEDIDO
+            \n Entregar em: "${address}"
+
+            ${products}
+
+            \n Valor total: ${total}`
+
+        /* @note: you can send the message to whatsapp
+        const PHONE_NUMBER = "YOUR_PHONE_NUMBER"
+        Linking.openURL(`http://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${message}`) 
+        */
+
+        cartStore.clear()
+        setAddress("")
+        navigation.goBack()
+    }
+
     return (
         <View className="flex-1 pt-8">
             <Header title="Seu carrinho" />
@@ -19,7 +60,11 @@ export default function Cart() {
                         {cartStore.products.length > 0 ? (
                             <View className="border-b border-slate-700">
                                 {cartStore.products.map((product) => (
-                                    <Product key={product.id} data={product} />
+                                    <Product
+                                        key={product.id}
+                                        data={product}
+                                        onPress={() => handleProductRemove(product)}
+                                    />
                                 ))}
                             </View>
                         ) : (
@@ -29,12 +74,18 @@ export default function Cart() {
                             <Text className="text-white text-xl font-subtitle">Total:</Text>
                             <Text className="text-lime-400 text-2xl font-heading">{total}</Text>
                         </View>
-                        <Input placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento..." />
+                        <Input
+                            placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento..."
+                            onChangeText={setAddress}
+                            blurOnSubmit
+                            onSubmitEditing={handleOrder}
+                            returnKeyType="next"
+                        />
                     </View>
                 </ScrollView>
             </KeyboardAwareScrollView>
             <View className="p-4 gap-5">
-                <Button>
+                <Button onPress={handleOrder}>
                     <Button.Text>Enviar pedido</Button.Text>
                     <Button.Icon>
                         <Feather name="arrow-right-circle" size={20} />

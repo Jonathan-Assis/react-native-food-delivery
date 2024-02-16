@@ -7,4 +7,6 @@ export interface IProductCartProps extends ProductProps {
 export interface IStateProps {
     products: IProductCartProps[]
     add: (product: ProductProps) => void
+    remove: (productId: string) => void
+    clear: () => void
 }
